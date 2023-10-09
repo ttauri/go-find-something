@@ -2,8 +2,6 @@
 
 ### Ideas:
 - Try colly
-- Stora data in a database
+- Store data in a database
 - Analyze data
-- Use web framework
-
-
+- Use Echo
