@@ -8,18 +8,17 @@ import (
 	"os"
 )
 
-// HTMLSeparator is a separator line in HTML
-
 const (
 	successString = "CODE:%d RespTime:%d %-3s - %3s \n" // Code, response time, URL, Title
 	HTMLSeparator = "\n" + `<div class="separator"> separator </div>` + "\n"
-	tableLine = "\n" + `<tr><td>{{.HTTPStatusCode}}</td><td>{{.URL}}<a href="{{.URL}}">Link</a></td><td>{{.Title}}</td></tr>` + "\n"
-	htmlTemplate = `<html> <head> <style> body { background-color: #222222; color: #b7aa6b; font-family: 'Courier New', monospace; margin: 0; padding: 0; } .table-header, table { width: 100%; border-collapse: collapse; table-layout: fixed; } .table-header div, th, td { padding: 5px; text-align: center; /* Left alignment */ font-size: 14px; } tr { border-bottom: none; } tr:first-child { border-top: 1px solid #b7aa6b; } tr:last-child { border-bottom: 1px solid #b7aa6b; } tr:hover { background-color: #333333; } .separator { text-align: center; margin-top: 20px; margin-bottom: 20px; font-size: 16px; font-weight: bold; } </style> <meta charset="UTF-8"> </head> <body> <table>` + "\n" + `</table>` + "\n" + `</body>` + "\n" + `</html>` + "\n"
-	openTableTag = `<table>` + "\n"
+	tableLine     = "\n" + `<tr><td>{{.HTTPStatusCode}}</td><td>{{.URL}}<a href="{{.URL}}">Link</a></td><td>{{.Title}}</td></tr>` + "\n"
+	htmlTemplate  = `<html> <head> <style> body { background-color: #222222; color: #b7aa6b; font-family: 'Courier New', monospace; margin: 0; padding: 0; } .table-header, table { width: 100%; border-collapse: collapse; table-layout: fixed; } .table-header div, th, td { padding: 5px; text-align: center; /* Left alignment */ font-size: 14px; } tr { border-bottom: none; } tr:first-child { border-top: 1px solid #b7aa6b; } tr:last-child { border-bottom: 1px solid #b7aa6b; } tr:hover { background-color: #333333; } .separator { text-align: center; margin-top: 20px; margin-bottom: 20px; font-size: 16px; font-weight: bold; } </style> <meta charset="UTF-8"> </head> <body> <table>` + "\n" + `</table>` + "\n" + `</body>` + "\n" + `</html>` + "\n"
+	openTableTag  = `<table>` + "\n"
 	closeTableTag = `</table>` + "\n"
-	closeHtmlTag = `</html>` + "\n"
-	closeBodyTag = `</body>` + "\n"
+	closeHtmlTag  = `</html>` + "\n"
+	closeBodyTag  = `</body>` + "\n"
 )
+
 func WriteToStdOut(dmn Domain) {
 	log.Printf(
 		successString,
@@ -27,7 +26,7 @@ func WriteToStdOut(dmn Domain) {
 		dmn.ResponseTime.Milliseconds(),
 		dmn.URL,
 		dmn.Title)
-	}
+}
 
 // Create report file if it doesn't exist
 // Add separator if it exists
@@ -63,7 +62,6 @@ func CheckReportFile() *os.File {
 
 	return f
 }
-
 
 // truncateLastLine removes the last n lines from the file represented by the *os.File parameter.
 func truncateLastLine(f *os.File, n int) error {
@@ -105,21 +103,21 @@ func truncateLastLine(f *os.File, n int) error {
 	return nil
 }
 
-func WriteToReport(f *os.File,dmn Domain) {
-		// Prepare the HTML template
-		tmpl := template.Must(template.New("status").Parse(tableLine))
-	
-		// Remove the last line from the file (the closing </table> tag and </html> tag)
-		truncateLastLine(f, 4)
-	
-		// Check URLs and append to report.html
-		err := tmpl.Execute(f, dmn)
-		if err != nil {
-			fmt.Println("Error executing template:", err)
-			return
-		}
+func WriteToReport(f *os.File, dmn Domain) {
+	// Prepare the HTML template
+	tmpl := template.Must(template.New("status").Parse(tableLine))
 
-		// Add closing tags
-		f.WriteString(closeTableTag + closeBodyTag + closeHtmlTag)
-	
+	// Remove the last line from the file (the closing </table> tag and </html> tag)
+	truncateLastLine(f, 4)
+
+	// Check URLs and append to report.html
+	err := tmpl.Execute(f, dmn)
+	if err != nil {
+		fmt.Println("Error executing template:", err)
+		return
 	}
+
+	// Add closing tags
+	f.WriteString(closeTableTag + closeBodyTag + closeHtmlTag)
+
+}

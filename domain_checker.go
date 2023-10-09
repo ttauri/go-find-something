@@ -1,9 +1,8 @@
 package main
 
 import (
-	"context"
+	"crypto/tls"
 	"log"
-	"math/rand"
 	"net/http"
 	"net/url"
 	"strings"
@@ -14,11 +13,10 @@ import (
 
 type SiteStatus string
 
-// What is this?
 const (
 	SiteExists       SiteStatus = "Exists"
-	SiteDoesNotExist            = "Does Not Exist"
-	SiteUnavailable             = "Unavailable"
+	SiteDoesNotExist SiteStatus = "Does Not Exist"
+	SiteUnavailable  SiteStatus = "Unavailable"
 )
 
 type Domain struct {
@@ -57,13 +55,6 @@ func CreateSemaphore(maxRoutines int) Semaphore {
 	return &semaphore{
 		semChan: make(chan struct{}, maxRoutines),
 	}
-}
-
-// Generate random domain name with given length
-func generateRandomDomainName(conf Config) Domain {
-	url := "https://" + GenerateRandomString(conf.domaindLength, conf.charset) + conf.zones[rand.Intn(len(conf.zones))]
-	domain := Domain{URL: url}
-	return domain
 }
 
 func (d *DomainList) deduplicateDomains() {
@@ -146,21 +137,14 @@ func (domain *Domain) checkAvailability() {
 	defer resp.Body.Close()
 }
 
-func RunScan(ctx context.Context, logChan chan Domain, sch chan int, conf Config) {
-	log.Print("Starting scan")
-	sem := CreateSemaphore(2)
-
-	domains := DomainList{}
-	domains.generateDomainNamesList(conf)
-
-	for i, domain := range domains.Domains {
-		sch <- i
-		sem.Acquire()
-		go func(domain Domain) {
-			domain.checkAvailability()
-			logChan <- domain
-			sem.Release()
-		}(domain)
-
+// Get HTTP client with disabled TLS verification
+func GetHttpClient() *http.Client {
+	httpClient := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
 	}
+	return httpClient
 }
