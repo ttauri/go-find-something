@@ -1,7 +1,8 @@
 ## go-find-something
+Generate random string and check domain availability.
 
-### Ideas:
-- Try colly
-- Store data in a database
-- Analyze data
-- Use Echo
+### TODO:
+[ ] Try colly
+[ ] Store data in a database
+[ ] Analyze data
+[ ] Use Echo
